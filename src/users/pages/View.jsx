@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+
 import {
   FaMapMarkerAlt,
   FaCalendarAlt,
   FaStar,
   FaArrowLeft,
-  FaMoneyBillWave
+  FaMoneyBillWave,
 } from "react-icons/fa";
-import { getCarByIdAPI } from "../../services/allAPI";
+
+import {
+  createBookingAPI,
+  getCarByIdAPI,
+} from "../../services/allAPI";
+
 import Header from "../components/Header";
 
 function View() {
@@ -18,7 +24,8 @@ function View() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ✅ Get user search data
+  // ================= SEARCH PARAMS =================
+
   const searchParams = JSON.parse(
     sessionStorage.getItem("carSearchParams")
   );
@@ -27,20 +34,21 @@ function View() {
   const dropoffDate = searchParams?.dropoffDate;
   const pickupLocation = searchParams?.pickupLocation;
 
-  // ✅ Calculate number of days
+  // ================= DAYS =================
+
   const calculateDays = () => {
     if (!pickupDate || !dropoffDate) return 0;
 
     const start = new Date(pickupDate);
     const end = new Date(dropoffDate);
 
-    const diffTime = end - start;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    return diffDays > 0 ? diffDays : 0;
+    const diff = end - start;
+    return Math.ceil(diff / (1000 * 60 * 60 * 24));
   };
 
   const totalDays = calculateDays();
+
+  // ================= FETCH CAR =================
 
   useEffect(() => {
     fetchCarDetails();
@@ -49,39 +57,87 @@ function View() {
   const fetchCarDetails = async () => {
     try {
       setLoading(true);
-      const result = await getCarByIdAPI(id);
 
-      if (result?.status === 200) {
-        setCar(result.data);
+      const res = await getCarByIdAPI(id);
+
+      if (res?.status === 200) {
+        setCar(res.data);
       } else {
-        setError("Failed to fetch car details");
+        setError("Failed to load car");
       }
     } catch (err) {
       console.error(err);
-      setError("Error fetching car details");
+      setError("Server error");
     } finally {
       setLoading(false);
     }
   };
 
+  // ================= BOOKING =================
+
+  const handleConfirmBooking = async () => {
+    const user = JSON.parse(sessionStorage.getItem("user"));
+
+    if (!user) {
+      alert("Please login first");
+      navigate("/login");
+      return;
+    }
+
+    if (!pickupDate || !dropoffDate) {
+      alert("Please select dates");
+      return;
+    }
+
+    const totalPrice = car.pricePerDay * totalDays;
+
+    const bookingData = {
+      userId: user._id, // ✅ IMPORTANT
+      carId: id,
+      pickupDate,
+      dropoffDate,
+      pickupLocation,
+      totalPrice,
+    };
+
+    console.log("Booking Data:", bookingData);
+
+    try {
+      const res = await createBookingAPI(bookingData);
+
+      if (res.status === 201) {
+        alert("Booking request sent! Wait for admin approval.");
+
+        // ✅ FIXED ROUTE
+        navigate("/user-profile");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Booking failed");
+    }
+  };
+
+  // ================= UI STATES =================
+
   if (loading) {
     return (
       <section className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <p className="text-xl text-gray-300">Loading car details...</p>
+        <p className="text-gray-300 text-xl">Loading...</p>
       </section>
     );
   }
 
   if (error) {
     return (
-      <section className="min-h-screen bg-gray-950 flex items-center justify-center px-6">
+      <section className="min-h-screen bg-gray-950 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-2xl text-red-400 mb-6">{error}</p>
+          <p className="text-red-400 text-xl mb-4">{error}</p>
+
           <Link
             to="/vehicle"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-yellow-400 text-black font-semibold hover:bg-yellow-300 transition"
+            className="bg-yellow-400 px-5 py-2 rounded-lg text-black font-semibold"
           >
-            <FaArrowLeft /> Back to Vehicles
+            <FaArrowLeft /> Back
           </Link>
         </div>
       </section>
@@ -92,123 +148,137 @@ function View() {
 
   const totalPrice = car.pricePerDay * totalDays;
 
+  // ================= MAIN UI =================
+
   return (
     <>
-    <Header/>
-<section className="min-h-screen bg-gray-950 px-6 py-8">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <Header />
 
-        {/* IMAGE */}
-        <div className="bg-gray-800 rounded-2xl shadow-2xl p-6 flex items-center justify-center">
-          <img
-            src={car.imageURL}
-            alt={car.name}
-            className="w-full max-w-md object-contain rounded-xl"
-          />
-        </div>
+      <section className="min-h-screen bg-gray-950 px-6 py-10 text-white">
 
-        {/* DETAILS */}
-        <div className="bg-gray-800 rounded-2xl shadow-2xl p-8 text-white">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12">
 
-          <h1 className="text-3xl font-bold">{car.name}</h1>
-          <p className="text-gray-400 mt-1">
-            {car.fuelType} • {car.type} • {car.seats} Seats
-          </p>
-
-          {/* RATING */}
-          <div className="flex items-center gap-1 mt-3">
-            {[...Array(4)].map((_, i) => (
-              <FaStar key={i} className="text-yellow-400" />
-            ))}
-            <span className="ml-2 text-sm text-gray-400">(4.0 / 5)</span>
+          {/* IMAGE */}
+          <div className="bg-gray-800 rounded-2xl p-6 flex justify-center items-center shadow-xl">
+            <img
+              src={car.imageURL}
+              alt={car.name}
+              className="max-w-md w-full object-contain rounded-xl"
+            />
           </div>
 
-          {/* PRICE */}
-          <div className="mt-2">
-            <p className="text-sm text-gray-400">Price per Day</p>
-            <h2 className="text-3xl font-extrabold text-yellow-400">
-              ₹{car.pricePerDay}
-              <span className="text-base font-medium text-gray-400"> / day</span>
-            </h2>
-          </div>
+          {/* DETAILS */}
+          <div className="bg-gray-800 rounded-2xl p-8 shadow-xl">
 
-          {/* USER INFO */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
+            <h1 className="text-3xl font-bold">{car.name}</h1>
 
-            {/* DATES */}
-            <div className="flex items-center gap-3 bg-gray-700 p-4 rounded-xl">
-              <FaCalendarAlt className="text-yellow-400" />
+            <p className="text-gray-400 mt-1">
+              {car.fuelType} • {car.type} • {car.seats} Seats
+            </p>
+
+            {/* Rating */}
+            <div className="flex gap-1 mt-3">
+              {[...Array(4)].map((_, i) => (
+                <FaStar key={i} className="text-yellow-400" />
+              ))}
+              <span className="ml-2 text-sm text-gray-400">(4.0 / 5)</span>
+            </div>
+
+            {/* Price */}
+            <div className="mt-4">
+              <p className="text-sm text-gray-400">Price / Day</p>
+
+              <h2 className="text-3xl text-yellow-400 font-bold">
+                ₹{car.pricePerDay}
+                <span className="text-base text-gray-400"> / day</span>
+              </h2>
+            </div>
+
+            {/* Dates + Location */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+
+              <div className="bg-gray-700 p-4 rounded-xl flex gap-3">
+                <FaCalendarAlt className="text-yellow-400" />
+
+                <div>
+                  <p className="text-gray-400 text-sm">Dates</p>
+                  <p className="font-semibold">
+                    {pickupDate} → {dropoffDate}
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-gray-700 p-4 rounded-xl flex gap-3">
+                <FaMapMarkerAlt className="text-yellow-400" />
+
+                <div>
+                  <p className="text-gray-400 text-sm">Location</p>
+                  <p className="font-semibold">
+                    {pickupLocation || car.location}
+                  </p>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Total */}
+            <div className="mt-4 bg-gray-700 p-4 rounded-xl flex gap-3">
+
+              <FaMoneyBillWave className="text-yellow-400 text-2xl" />
+
               <div>
-                <p className="text-sm text-gray-400">Rental Dates</p>
-                <p className="font-semibold">
-                  {pickupDate} → {dropoffDate}
+                <p className="text-gray-400 text-sm">
+                  Total ({totalDays} days)
+                </p>
+
+                <p className="text-yellow-400 text-2xl font-bold">
+                  ₹{totalPrice}
                 </p>
               </div>
+
             </div>
 
-            {/* LOCATION */}
-            <div className="flex items-center gap-3 bg-gray-700 p-4 rounded-xl">
-              <FaMapMarkerAlt className="text-yellow-400" />
-              <div>
-                <p className="text-sm text-gray-400">Pickup Location</p>
-                <p className="font-semibold">
-                  {pickupLocation || car.location}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* TOTAL PRICE */}
-          <div className="mt-3 p-5 rounded-xl bg-gray-700 flex items-center gap-4">
-            <FaMoneyBillWave className="text-yellow-400 text-2xl" />
-            <div>
-              <p className="text-sm text-gray-400">
-                Total Price ({totalDays} day{totalDays > 1 ? "s" : ""})
-              </p>
-              <p className="text-2xl font-bold text-yellow-400">
-                ₹{totalPrice}
-              </p>
-            </div>
-          </div>
-
-          {/* AVAILABILITY */}
-          <div
-            className={`mt-3 p-4 rounded-xl ${
-              car.isAvailable
-                ? "bg-green-900 text-green-300"
-                : "bg-red-900 text-red-300"
-            }`}
-          >
-            {car.isAvailable
-              ? "✓ Available for Selected Dates"
-              : "✗ Not Available"}
-          </div>
-
-          {/* DESCRIPTION */}
-          <p className="mt-3 text-gray-300 leading-relaxed">
-            {car.about}
-          </p>
-
-          {/* CTA */}
-          <div className="mt-2 flex flex-col sm:flex-row gap-4">
-            <button
-              disabled={!car.isAvailable || totalDays === 0}
-              className="flex-1 px-6 py-3 rounded-xl bg-yellow-400 text-black font-semibold hover:bg-yellow-300 disabled:bg-gray-600 transition"
+            {/* Availability */}
+            <div
+              className={`mt-4 p-3 rounded-xl ${
+                car.isAvailable
+                  ? "bg-green-900 text-green-300"
+                  : "bg-red-900 text-red-300"
+              }`}
             >
-              Confirm Booking
-            </button>
+              {car.isAvailable
+                ? "✓ Available"
+                : "✗ Not Available"}
+            </div>
 
-            <button
-              onClick={() => navigate("/vehicles/cars")}
-              className="flex-1 px-6 py-3 rounded-xl border border-gray-600 text-gray-300 hover:bg-gray-700 transition"
-            >
-              Back to Vehicles
-            </button>
+            {/* About */}
+            <p className="mt-4 text-gray-300 leading-relaxed">
+              {car.about}
+            </p>
+
+            {/* Buttons */}
+            <div className="mt-6 flex flex-col sm:flex-row gap-4">
+
+              <button
+                onClick={handleConfirmBooking}
+                disabled={!car.isAvailable || totalDays === 0}
+                className="flex-1 bg-yellow-400 text-black font-semibold py-3 rounded-xl hover:bg-yellow-300 disabled:bg-gray-600 transition"
+              >
+                Send Booking Request
+              </button>
+
+              <button
+                onClick={() => navigate("/vehicles/cars")}
+                className="flex-1 border border-gray-600 text-gray-300 py-3 rounded-xl hover:bg-gray-700 transition"
+              >
+                Back
+              </button>
+
+            </div>
+
           </div>
-
         </div>
-      </div>
-    </section>
+      </section>
     </>
   );
 }

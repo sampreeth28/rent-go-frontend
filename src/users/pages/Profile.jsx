@@ -1,90 +1,224 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { FaUserCircle } from "react-icons/fa";
+import { getUserBookingsAPI } from "../../services/allAPI";
+
+import {
+  FaCar,
+  FaClock,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaMapMarkerAlt,
+  FaCalendarAlt,
+} from "react-icons/fa";
 import Header from "../components/Header";
 import Footer from "@/components/Footer";
 
-const Profile = () => {
+function Profile() {
 
-  // ✅ SAME as Header component
-  const user = JSON.parse(localStorage.getItem("currentUser"));
+  // Get logged-in user
+  const user = JSON.parse(sessionStorage.getItem("user"));
 
-  const bookings = [
-    {
-      car: "Tesla Model 3",
-      status: "In Progress",
-      pickup: "Jan 13, 2026",
-      dropoff: "Jan 14, 2026",
-      location: "Downtown Station",
-      icon: "🕒",
-      statusColor: "text-yellow-400",
-    },
-    {
-      car: "Honda Civic",
-      status: "Completed",
-      pickup: null,
-      dropoff: null,
-      location: "Uptown Branch",
-      icon: "✔️",
-      statusColor: "text-green-400",
-    },
-  ];
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // ================= FETCH USER BOOKINGS =================
+  const fetchBookings = async () => {
+    try {
+
+      if (!user?._id) return;
+
+      setLoading(true);
+
+      const res = await getUserBookingsAPI(user._id);
+
+      if (res?.status === 200) {
+        setBookings(res.data);
+      }
+
+    } catch (err) {
+      console.error(err);
+      alert("Failed to load bookings");
+
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBookings();
+  }, []);
+
+  // ================= STATUS UI =================
+  const getStatusUI = (status) => {
+
+    if (status === "CONFIRMED")
+      return (
+        <span className="text-green-400 flex items-center gap-1">
+          <FaCheckCircle /> Confirmed
+        </span>
+      );
+
+    if (status === "REJECTED")
+      return (
+        <span className="text-red-400 flex items-center gap-1">
+          <FaTimesCircle /> Rejected
+        </span>
+      );
+
+    return (
+      <span className="text-yellow-400 flex items-center gap-1">
+        <FaClock /> Pending
+      </span>
+    );
+  };
 
   return (
     <>
-      <Header />
+      <Header/>
 
-      <div className="min-h-screen w-full bg-gray-950 text-white p-8">
-        <div className="max-w-4xl mx-auto space-y-8">
+      <section className="min-h-screen bg-gray-950 px-6 py-10 text-white">
 
-          {/* PROFILE */}
-          <div className="flex items-center justify-between border-b border-gray-700 pb-6">
-            <div className="flex items-center space-x-4">
-              <img
-                src={user?.profile || "https://via.placeholder.com/80"}
-                alt="Profile"
-                className="w-20 h-20 rounded-full border-2 border-gray-600"
-              />
+        <div className="max-w-5xl mx-auto space-y-8">
+
+          {/* ================= PROFILE ================= */}
+          
+          <div className="bg-gray-800 rounded-2xl shadow-xl p-6 mb-8">
+
+            <div className="flex items-center gap-4">
+
+              {/* User Icon */}
+              <FaUserCircle className="text-yellow-400 text-4xl" />
+
+              {/* User Info */}
               <div>
-                <h2 className="text-2xl font-semibold">
-                  {user?.username || user?.name}
+                <h2 className="text-2xl font-bold text-white">
+                  {user?.username || "User"}
                 </h2>
-                <p className="text-gray-400">
-                  {user?.phone}
-                </p>
-                <p className="text-gray-500 text-sm">
-                  Logged in user
+
+                <p className="text-gray-400 text-sm mt-1">
+                  {user?.email || "No email"}
                 </p>
               </div>
+
             </div>
 
-            <button className="px-5 py-2 bg-blue-600 rounded hover:bg-blue-700">
-              Edit
-            </button>
           </div>
 
-          {/* BOOKINGS */}
+          {/* ================= BOOKINGS ================= */}
           <div>
-            <h3 className="text-xl font-semibold mb-4">Booked Vehicles</h3>
-            <div className="space-y-4">
-              {bookings.map((booking, index) => (
-                <div key={index} className="bg-gray-800 p-5 rounded-lg">
-                  <h4 className="text-lg font-semibold">{booking.car}</h4>
-                  <p className={booking.statusColor}>
-                    {booking.icon} {booking.status}
-                  </p>
-                  {booking.pickup && <p>Pickup: {booking.pickup}</p>}
-                  {booking.dropoff && <p>Dropoff: {booking.dropoff}</p>}
-                  <p>📍 {booking.location}</p>
+
+            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+              <FaCar className="text-yellow-400" />
+              My Bookings
+            </h2>
+
+
+            {/* Loading */}
+            {loading && (
+              <p className="text-gray-400 text-center">
+                Loading bookings...
+              </p>
+            )}
+
+
+            {/* Empty */}
+            {!loading && bookings.length === 0 && (
+              <p className="text-gray-400 text-center">
+                No bookings found
+              </p>
+            )}
+
+
+            {/* Booking List */}
+            <div className="space-y-5">
+
+              {bookings.map((booking) => (
+
+                <div
+                  key={booking._id}
+                  className="bg-gray-800 p-5 rounded-xl border border-gray-700"
+                >
+
+                  {/* Header */}
+                  <div className="flex justify-between mb-3">
+
+                    <h3 className="text-xl font-bold flex items-center gap-2">
+                      <FaCar className="text-yellow-400" />
+                      {booking.carId?.name}
+                    </h3>
+
+                    {getStatusUI(booking.status)}
+
+                  </div>
+
+
+                  {/* Info */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-300">
+
+                    {/* Dates */}
+                    <div className="flex gap-2">
+                      <FaCalendarAlt className="text-yellow-400" />
+                      <span>
+                        {new Date(booking.pickupDate).toLocaleDateString()} →
+                        {" "}
+                        {new Date(booking.dropoffDate).toLocaleDateString()}
+                      </span>
+                    </div>
+
+
+                    {/* Location */}
+                    <div className="flex gap-2">
+                      <FaMapMarkerAlt className="text-yellow-400" />
+                      <span>
+                        {booking.pickupLocation}
+                      </span>
+                    </div>
+
+
+                    {/* Price */}
+                    <div className="font-bold text-yellow-400">
+                      ₹{booking.totalPrice}
+                    </div>
+
+                  </div>
+
+
+                  {/* ================= STATUS NOTE ================= */}
+                  <div className="mt-4 p-3 rounded-lg text-sm font-medium">
+
+                    {booking.status === "PENDING" && (
+                      <p className="text-yellow-400 bg-yellow-900/30 border border-yellow-700 rounded-md p-2">
+                        ⏳ Please wait until admin approves your booking.
+                      </p>
+                    )}
+
+                    {booking.status === "CONFIRMED" && (
+                      <p className="text-green-400 bg-green-900/30 border border-green-700 rounded-md p-2">
+                        ✅ Your booking has been confirmed. Pick up from the location at your selected time.
+                      </p>
+                    )}
+
+                    {booking.status === "REJECTED" && (
+                      <p className="text-red-400 bg-red-900/30 border border-red-700 rounded-md p-2">
+                        ❌ Your booking was rejected. Please try another car.
+                      </p>
+                    )}
+
+                  </div>
+
                 </div>
               ))}
+
             </div>
+
           </div>
 
         </div>
-      </div>
+      </section>
 
-      <Footer />
+      <Footer/>
     </>
   );
-};
+}
 
 export default Profile;

@@ -128,7 +128,7 @@ function Home() {
               <img src="/4517a553-c3e4-4f30-afc8-5b04ccf4e5ec.jpg" class="w-1/3 h-full object-cover snap-center flex-shrink-0 rounded-lg" />
               <img src="/ae2e1933-802f-4603-bb53-fe87884f9be7.jpg" class="w-1/3 h-full object-cover snap-center flex-shrink-0 rounded-lg" />
             </div>
-            <Link to="/vehicle" className="mt-10 inline-flex items-center justify-center px-8 py-2 text-lg font-semibold text-white bg-yellow-500 hover:bg-yellow-600 transition-all duration-300 rounded-xl shadow-lg">Explore Offers</Link>
+            <Link to="/user/input" className="mt-10 inline-flex items-center justify-center px-8 py-2 text-lg font-semibold text-white bg-yellow-500 hover:bg-yellow-600 transition-all duration-300 rounded-xl shadow-lg">Explore Offers</Link>
 
           </section>
 

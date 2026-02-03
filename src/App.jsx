@@ -16,6 +16,7 @@ import AdminProfile from './admin/pages/AdminProfile'
 import AdminHome from './admin/pages/AdminHome'
 import View from './users/pages/View'
 import ManageVehicles from './admin/components/ManageVehicles'
+import BookingStatus from './admin/components/BookingStatus'
 
 
 function App() {
@@ -47,6 +48,7 @@ function App() {
       <Route path="/admin/Profile" element={< AdminProfile />} />
       <Route path="/admin/home" element={< AdminHome />} />
       <Route path="/manage-vehicles" element={<ManageVehicles />} />
+      <Route path="/manage-booking" element={<BookingStatus />} />
     </Routes>
     </>
   )
