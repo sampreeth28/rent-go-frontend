@@ -16,14 +16,17 @@ import {
   FaUser,
   FaMapMarkerAlt,
   FaCalendarAlt,
+  FaIdCard,
 } from "react-icons/fa";
+
+const BASE_URL = "http://localhost:3000";
 
 function BookingStatus() {
 
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Get Admin Token
+  // Admin token
   const token = sessionStorage.getItem("token");
 
   // ================= FETCH BOOKINGS =================
@@ -32,7 +35,7 @@ function BookingStatus() {
     try {
       setLoading(true);
 
-      const res = await getAllBookingsAPI(token); // ✅ PASS TOKEN
+      const res = await getAllBookingsAPI(token);
 
       if (res?.status === 200) {
         setBookings(res.data);
@@ -56,7 +59,7 @@ function BookingStatus() {
     if (!window.confirm("Approve this booking?")) return;
 
     try {
-      await approveBookingAPI(id, token); // ✅ PASS TOKEN
+      await approveBookingAPI(id, token);
 
       alert("Booking approved");
       fetchBookings();
@@ -69,20 +72,27 @@ function BookingStatus() {
 
   // ================= REJECT =================
 
-  const handleReject = async (id) => {
-    if (!window.confirm("Reject this booking?")) return;
+const handleReject = async (id) => {
 
-    try {
-      await rejectBookingAPI(id, token); // ✅ PASS TOKEN
+  const reason = prompt("Enter reason for rejection:");
 
-      alert("Booking rejected");
-      fetchBookings();
+  if (!reason) {
+    alert("Rejection reason is required");
+    return;
+  }
 
-    } catch (err) {
-      console.error(err);
-      alert("Reject failed");
-    }
-  };
+  try {
+    await rejectBookingAPI(id, { reason }, token);
+
+    alert("Booking rejected");
+    fetchBookings();
+
+  } catch (err) {
+    console.error(err);
+    alert("Reject failed");
+  }
+};
+
 
   // ================= STATUS UI =================
 
@@ -157,19 +167,53 @@ function BookingStatus() {
 
               </div>
 
-              {/* Info */}
+              {/* Info Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
 
-                {/* User */}
-                <div className="flex gap-2 items-start">
+                {/* USER + LICENSE */}
+                <div className="flex gap-3 items-start">
+
                   <FaUser className="text-yellow-400 mt-1" />
-                  <div>
-                    <p className="text-gray-400">User</p>
-                    <p>{booking.userId?.username}</p>
-                    <p className="text-gray-400 text-xs">
-                      {booking.userId?.email}
-                    </p>
+
+                  <div className="space-y-2">
+
+                    <div>
+                      <p className="text-gray-400">User</p>
+                      <p className="font-semibold">
+                        {booking.userId?.username}
+                      </p>
+                      <p className="text-gray-400 text-xs">
+                        {booking.userId?.email}
+                      </p>
+                    </div>
+
+                    {/* LICENSE IMAGE */}
+                    <div>
+                      <p className="text-gray-400 flex items-center gap-1 mb-1">
+                        <FaIdCard /> License
+                      </p>
+
+                      {booking.userId?.licenseImage ? (
+                        <img
+                          src={`${BASE_URL}${booking.userId.licenseImage}`}
+                          alt="License"
+                          className="w-32 h-20 object-cover rounded border border-gray-600 cursor-pointer hover:scale-105 transition"
+                          onClick={() =>
+                            window.open(
+                              `${BASE_URL}${booking.userId.licenseImage}`,
+                              "_blank"
+                            )
+                          }
+                        />
+                      ) : (
+                        <p className="text-red-400 text-xs">
+                          No license uploaded
+                        </p>
+                      )}
+                    </div>
+
                   </div>
+
                 </div>
 
                 {/* Dates */}
@@ -178,8 +222,7 @@ function BookingStatus() {
                   <div>
                     <p className="text-gray-400">Dates</p>
                     <p>
-                      {new Date(booking.pickupDate).toLocaleDateString()} →
-                      {" "}
+                      {new Date(booking.pickupDate).toLocaleDateString()} →{" "}
                       {new Date(booking.dropoffDate).toLocaleDateString()}
                     </p>
                   </div>

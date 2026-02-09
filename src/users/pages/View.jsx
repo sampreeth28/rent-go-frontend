@@ -264,7 +264,7 @@ function View() {
                 disabled={!car.isAvailable || totalDays === 0}
                 className="flex-1 bg-yellow-400 text-black font-semibold py-3 rounded-xl hover:bg-yellow-300 disabled:bg-gray-600 transition"
               >
-                Send Booking Request
+                Book Now
               </button>
 
               <button

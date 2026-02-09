@@ -1,6 +1,10 @@
 import commonAPI from "./commonAPI";
 import serverURL from "./serverURL";
 
+import axios from "axios";
+
+const BASE_URL = "http://localhost:3000"; // ✅ ADD THIS
+
 // ================= USER APIs =================
 
 export const registerAPI = async (userDetails) => {
@@ -109,16 +113,17 @@ export const approveBookingAPI = async (bookingId, token) => {
 };
 
 // Reject booking (Admin)
-export const rejectBookingAPI = async (bookingId, token) => {
+export const rejectBookingAPI = async (bookingId, data, token) => {
   return await commonAPI(
     "PUT",
     `${serverURL}/reject-booking/${bookingId}`,
-    "",
+    data,
     {
       Authorization: `Bearer ${token}`,
     }
   );
 };
+
 
 
 // ================= ADMIN STATS =================
@@ -129,4 +134,34 @@ export const getAdminStatsAPI = async () => {
     ""
   );
 };
+
+
+export const createPaymentIntentAPI = async (data) => {
+  return await commonAPI(
+    "POST",
+    `${serverURL}/create-payment-intent`,
+    data
+  );
+};
+
+
+export const uploadLicenseAPI = (formData) => {
+  return axios.post(
+    `${serverURL}/upload-license`,
+    formData
+  );
+};
+
+// Cancel booking
+export const cancelBookingAPI = async (bookingId) => {
+  return await commonAPI(
+    "PUT",
+    `${serverURL}/cancel-booking/${bookingId}`,
+    {}
+  );
+};
+
+
+
+
 
