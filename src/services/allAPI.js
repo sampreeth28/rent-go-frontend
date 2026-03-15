@@ -1,9 +1,6 @@
 import commonAPI from "./commonAPI";
 import serverURL from "./serverURL";
-
 import axios from "axios";
-
-const BASE_URL = "http://localhost:3000"; // ✅ ADD THIS
 
 // ================= USER APIs =================
 
@@ -46,27 +43,20 @@ export const updateCarAPI = async (carId, carDetails) => {
 };
 
 export const deleteCarAPI = async (carId) => {
-  try {
-    const response = await commonAPI(
-      "DELETE",
-      `${serverURL}/deleteCar/${carId}`,
-      {}
-    );
-    console.log("Delete API response:", response);
-    return response;
-  } catch (error) {
-    console.error("Delete API error:", error);
-    throw error;
-  }
+  return await commonAPI(
+    "DELETE",
+    `${serverURL}/deleteCar/${carId}`,
+    {}
+  );
 };
 
 // ================= BOOKINGS APIs =================
 
-// Create booking (User)
+// ✅ CREATE BOOKING
 export const createBookingAPI = async (bookingData, token) => {
   return await commonAPI(
     "POST",
-    `${serverURL}/create-booking`,
+    `${serverURL}/api/bookings/create-booking`,
     bookingData,
     {
       Authorization: `Bearer ${token}`,
@@ -74,11 +64,11 @@ export const createBookingAPI = async (bookingData, token) => {
   );
 };
 
-// Get all bookings (Admin)
+// ✅ GET ALL BOOKINGS (ADMIN)
 export const getAllBookingsAPI = async (token) => {
   return await commonAPI(
     "GET",
-    `${serverURL}/admin/bookings`,
+    `${serverURL}/api/bookings/all-bookings`,
     "",
     {
       Authorization: `Bearer ${token}`,
@@ -86,11 +76,23 @@ export const getAllBookingsAPI = async (token) => {
   );
 };
 
-// Get user bookings (User)
+// ✅ GET PENDING BOOKINGS
+export const getPendingBookingsAPI = async (token) => {
+  return await commonAPI(
+    "GET",
+    `${serverURL}/api/bookings/pending-bookings`,
+    "",
+    {
+      Authorization: `Bearer ${token}`,
+    }
+  );
+};
+
+// ✅ GET USER BOOKINGS
 export const getUserBookingsAPI = async (userId, token) => {
   return await commonAPI(
     "GET",
-    `${serverURL}/user/bookings/${userId}`,
+    `${serverURL}/api/bookings/user-bookings/${userId}`,
     "",
     {
       Authorization: `Bearer ${token}`,
@@ -98,25 +100,23 @@ export const getUserBookingsAPI = async (userId, token) => {
   );
 };
 
-
-
-// Approve booking (Admin)
+// ✅ APPROVE BOOKING
 export const approveBookingAPI = async (bookingId, token) => {
   return await commonAPI(
     "PUT",
-    `${serverURL}/approve-booking/${bookingId}`,
-    "",
+    `${serverURL}/api/bookings/approve-booking/${bookingId}`,
+    {},
     {
       Authorization: `Bearer ${token}`,
     }
   );
 };
 
-// Reject booking (Admin)
+// ✅ REJECT BOOKING
 export const rejectBookingAPI = async (bookingId, data, token) => {
   return await commonAPI(
     "PUT",
-    `${serverURL}/reject-booking/${bookingId}`,
+    `${serverURL}/api/bookings/reject-booking/${bookingId}`,
     data,
     {
       Authorization: `Bearer ${token}`,
@@ -124,26 +124,44 @@ export const rejectBookingAPI = async (bookingId, data, token) => {
   );
 };
 
-
+// ✅ CANCEL BOOKING
+export const cancelBookingAPI = async (bookingId) => {
+  return await commonAPI(
+    "PUT",
+    `${serverURL}/api/bookings/cancel-booking/${bookingId}`,
+    {}
+  );
+};
 
 // ================= ADMIN STATS =================
+
 export const getAdminStatsAPI = async () => {
   return await commonAPI(
     "GET",
-    `${serverURL}/admin/stats`,
+    `${serverURL}/api/bookings/admin-stats`,
     ""
   );
 };
 
+// ================= PAYMENT APIs =================
 
 export const createPaymentIntentAPI = async (data) => {
   return await commonAPI(
     "POST",
-    `${serverURL}/create-payment-intent`,
+    `${serverURL}/api/payment/create-payment-intent`,
     data
   );
 };
 
+export const confirmPaymentAPI = async (paymentData) => {
+  return await commonAPI(
+    "POST",
+    `${serverURL}/api/payment/confirm-payment`,
+    paymentData
+  );
+};
+
+// ================= LICENSE UPLOAD =================
 
 export const uploadLicenseAPI = (formData) => {
   return axios.post(
@@ -151,17 +169,3 @@ export const uploadLicenseAPI = (formData) => {
     formData
   );
 };
-
-// Cancel booking
-export const cancelBookingAPI = async (bookingId) => {
-  return await commonAPI(
-    "PUT",
-    `${serverURL}/cancel-booking/${bookingId}`,
-    {}
-  );
-};
-
-
-
-
-

@@ -19,6 +19,8 @@ import ManageVehicles from './admin/components/ManageVehicles'
 import BookingStatus from './admin/components/BookingStatus'
 import PaymentSuccess from './users/pages/PaymentSuccess'
 import PaymentError from './users/pages/PaymentError'
+import Payment from './users/pages/Payment'
+
 
 
 function App() {
@@ -46,8 +48,9 @@ function App() {
       <Route path="/vehicles/bike" element={< Bikes />} />
       <Route path="/vehicles/cars" element={< Cars />} />
 
-      <Route path="/user/pysuccess" element={< PaymentSuccess />} />
-      <Route path="/user/pyfailed" element={< PaymentError />} />
+      <Route path="/payment/:carId" element={<Payment />} />
+      <Route path="/payment-success" element={<PaymentSuccess />} />
+      <Route path="/payment-failure" element={<PaymentError />} />
 
       <Route path="/admin/add" element={< AddVehichle />} />
       <Route path="/admin/Profile" element={< AdminProfile />} />

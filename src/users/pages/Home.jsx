@@ -1,6 +1,6 @@
 import React from 'react'
-import { FaStar } from 'react-icons/fa';
-import { ToastContainer, toast } from 'react-toastify';
+import { FaStar, FaQuoteLeft, FaUsers, FaCarSide } from 'react-icons/fa';
+import { ToastContainer } from 'react-toastify';
 import Footer from '../../components/Footer';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
@@ -132,21 +132,129 @@ function Home() {
 
           </section>
 
-          {/* author */}
-          <section className='md:px-40 p-5  items-center text-white'>
-            {/* author content */}
-            <div className="text-center">
-              <h1 className="text-2xl font-bold">What our customers say</h1>
-              <p style={{ margin: "100px" }} className="text-justify">
-                ⭐⭐⭐⭐⭐ Arjun S. (Chennai → Ooty Trip) <br /> <br />
-                “I booked the BMW 5 Series for our weekend getaway to Ooty, and I can honestly say it exceeded all expectations! From the moment I picked up the car, everything was smooth and hassle-free. The staff walked me through the features, and the car was spotless inside and out. On the highway, the ride was powerful yet comfortable, making the long drive enjoyable for everyone. Returning the car was just as easy. The pricing was transparent with no hidden charges. Definitely my go-to rental service from now on!”</p>
+          <section className="md:px-40 px-6 py-20 text-white">
 
-              <p style={{ margin: "100px" }} className="text-justify mt-5">
-                ⭐⭐⭐⭐☆ Meera P. (Family Trip to Munnar) <br /><br />
-                “We rented an SUV for our family trip to Munnar — and it turned out to be a great choice! The vehicle was spacious and comfortable, even for long mountain roads. The booking process was quick, and customer support was friendly and helpful with route suggestions. The only minor issue was that the GPS system could have been more updated, but otherwise everything was fantastic. Highly recommended for family vacations!”</p>
-              <br /><br /><br />
+            <h1 className="text-4xl font-bold text-center mb-12">
+              What Our Customers Say
+            </h1>
+
+            <div className="grid md:grid-cols-3 gap-8">
+
+              {/* Review Card */}
+              <div className="bg-gray-800 p-6 rounded-xl shadow-lg">
+
+                <FaQuoteLeft className="text-yellow-400 text-3xl mb-3" />
+
+                <p className="text-gray-300">
+                  Amazing service! Smooth booking and clean cars.
+                  Highly recommended.
+                </p>
+
+                <h3 className="mt-4 font-bold text-yellow-400">
+                  Arjun S.
+                </h3>
+              </div>
+
+
+              <div className="bg-gray-800 p-6 rounded-xl shadow-lg">
+
+                <FaQuoteLeft className="text-yellow-400 text-3xl mb-3" />
+
+                <p className="text-gray-300">
+                  Perfect for family trips. Great support team. Good customer support
+                </p>
+
+                <h3 className="mt-4 font-bold text-yellow-400">
+                  Meera P.
+                </h3>
+              </div>
+
+
+              <div className="bg-gray-800 p-6 rounded-xl shadow-lg">
+
+                <FaQuoteLeft className="text-yellow-400 text-3xl mb-3" />
+
+                <p className="text-gray-300">
+                  Best rental experience I’ve had. Clean cars and fair pricing.
+                </p>
+
+                <h3 className="mt-4 font-bold text-yellow-400">
+                  Rahul K.
+                </h3>
+
+              </div>
+
             </div>
+
           </section>
+
+
+          {/* ================= ABOUT US ================= */}
+
+          <section className="md:px-40 px-6 py-20 bg-gray-900 text-white">
+
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+
+              {/* Left */}
+              <div>
+
+                <h2 className="text-4xl font-bold mb-6">
+                  About Rent&GO
+                </h2>
+
+                <p className="text-gray-400 leading-relaxed mb-4">
+
+                  Rent&GO is your trusted partner for hassle-free
+                  car rentals across India. We provide clean,
+                  well-maintained vehicles with transparent pricing.
+
+                </p>
+
+                <p className="text-gray-400 leading-relaxed">
+
+                  Whether it’s a weekend getaway, family trip,
+                  or business travel — we ensure comfort,
+                  safety, and reliability.
+
+                </p>
+
+              </div>
+
+
+              {/* Right */}
+              <div className="grid grid-cols-2 gap-6">
+
+                <div className="bg-gray-800 p-6 rounded-xl text-center">
+
+                  <FaUsers className="text-yellow-400 text-4xl mx-auto mb-2" />
+
+                  <h3 className="text-2xl font-bold">10K+</h3>
+
+                  <p className="text-gray-400 text-sm">
+                    Happy Customers
+                  </p>
+
+                </div>
+
+
+                <div className="bg-gray-800 p-6 rounded-xl text-center">
+
+                  <FaCarSide className="text-yellow-400 text-4xl mx-auto mb-2" />
+
+                  <h3 className="text-2xl font-bold">500+</h3>
+
+                  <p className="text-gray-400 text-sm">
+                    Vehicles
+                  </p>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </section>
+
 
           <ToastContainer
             position="top-center"

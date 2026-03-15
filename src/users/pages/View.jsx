@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import {loadStripe} from '@stripe/stripe-js';
 
 import {
   FaMapMarkerAlt,
@@ -10,7 +11,6 @@ import {
 } from "react-icons/fa";
 
 import {
-  createBookingAPI,
   getCarByIdAPI,
 } from "../../services/allAPI";
 
@@ -73,48 +73,51 @@ function View() {
     }
   };
 
-  // ================= BOOKING =================
+  // ================= NAVIGATE TO PAYMENT =================
 
-  const handleConfirmBooking = async () => {
+  const handleBookNow = () => {
     const user = JSON.parse(sessionStorage.getItem("user"));
 
+    // Check if user is logged in
     if (!user) {
       alert("Please login first");
       navigate("/login");
       return;
     }
 
+    // Validate dates
     if (!pickupDate || !dropoffDate) {
       alert("Please select dates");
+      navigate("/input");
       return;
     }
 
-    const totalPrice = car.pricePerDay * totalDays;
+    if (totalDays === 0) {
+      alert("Invalid date range");
+      return;
+    }
 
-    const bookingData = {
-      userId: user._id, // ✅ IMPORTANT
-      carId: id,
+    // Validate car availability
+    if (!car.isAvailable) {
+      alert("Car is not available");
+      return;
+    }
+
+    // Store booking details in sessionStorage for Payment page
+    const bookingDetails = {
+      pickupLocation: pickupLocation || car.location,
       pickupDate,
       dropoffDate,
-      pickupLocation,
-      totalPrice,
+      pickupTime: searchParams?.pickupTime || "",
+      dropoffTime: searchParams?.dropoffTime || "",
     };
 
-    console.log("Booking Data:", bookingData);
+    console.log("Booking Details stored:", bookingDetails);
+    sessionStorage.setItem("bookingDetails", JSON.stringify(bookingDetails));
 
-    try {
-      const res = await createBookingAPI(bookingData);
-
-      if (res.status === 201) {
-        alert("Booking request sent! Wait for admin approval.");
-
-        // ✅ FIXED ROUTE
-        navigate("/user-profile");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Booking failed");
-    }
+    // Navigate to payment page
+    console.log("Navigating to payment page for car:", id);
+    navigate(`/payment/${id}`);
   };
 
   // ================= UI STATES =================
@@ -135,7 +138,7 @@ function View() {
 
           <Link
             to="/vehicle"
-            className="bg-yellow-400 px-5 py-2 rounded-lg text-black font-semibold"
+            className="bg-yellow-400 px-5 py-2 rounded-lg text-black font-semibold inline-flex items-center gap-2"
           >
             <FaArrowLeft /> Back
           </Link>
@@ -170,8 +173,10 @@ function View() {
           {/* DETAILS */}
           <div className="bg-gray-800 rounded-2xl p-8 shadow-xl">
 
-            <h1 className="text-3xl font-bold">{car.name}</h1>
+            {/* Car Name */}
+            <h1 className="text-3xl font-bold">{car.brand} {car.name}</h1>
 
+            {/* Car Type & Details */}
             <p className="text-gray-400 mt-1">
               {car.fuelType} • {car.type} • {car.seats} Seats
             </p>
@@ -198,22 +203,27 @@ function View() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
 
               <div className="bg-gray-700 p-4 rounded-xl flex gap-3">
-                <FaCalendarAlt className="text-yellow-400" />
+                <FaCalendarAlt className="text-yellow-400 text-lg mt-1" />
 
                 <div>
                   <p className="text-gray-400 text-sm">Dates</p>
-                  <p className="font-semibold">
+                  <p className="font-semibold text-sm">
                     {pickupDate} → {dropoffDate}
                   </p>
+                  {searchParams?.pickupTime && (
+                    <p className="text-xs text-gray-400">
+                      {searchParams.pickupTime} → {searchParams.dropoffTime}
+                    </p>
+                  )}
                 </div>
               </div>
 
               <div className="bg-gray-700 p-4 rounded-xl flex gap-3">
-                <FaMapMarkerAlt className="text-yellow-400" />
+                <FaMapMarkerAlt className="text-yellow-400 text-lg mt-1" />
 
                 <div>
                   <p className="text-gray-400 text-sm">Location</p>
-                  <p className="font-semibold">
+                  <p className="font-semibold text-sm">
                     {pickupLocation || car.location}
                   </p>
                 </div>
@@ -221,7 +231,7 @@ function View() {
 
             </div>
 
-            {/* Total */}
+            {/* Total Price */}
             <div className="mt-4 bg-gray-700 p-4 rounded-xl flex gap-3">
 
               <FaMoneyBillWave className="text-yellow-400 text-2xl" />
@@ -247,31 +257,42 @@ function View() {
               }`}
             >
               {car.isAvailable
-                ? "✓ Available"
+                ? "✓ Available for booking"
                 : "✗ Not Available"}
             </div>
 
             {/* About */}
-            <p className="mt-4 text-gray-300 leading-relaxed">
+            <p className="mt-4 text-gray-300 leading-relaxed text-sm">
               {car.about}
             </p>
+
+            {/* Info Box */}
+            <div className="mt-4 p-3 bg-blue-900 border border-blue-700 rounded-lg">
+              <p className="text-blue-200 text-xs">
+                <strong>Next Step:</strong> Click "Book Now" to proceed to secure payment page
+              </p>
+            </div>
 
             {/* Buttons */}
             <div className="mt-6 flex flex-col sm:flex-row gap-4">
 
               <button
-                onClick={handleConfirmBooking}
+                onClick={handleBookNow}
                 disabled={!car.isAvailable || totalDays === 0}
-                className="flex-1 bg-yellow-400 text-black font-semibold py-3 rounded-xl hover:bg-yellow-300 disabled:bg-gray-600 transition"
+                className={`flex-1 font-semibold py-3 rounded-xl transition flex items-center justify-center gap-2 ${
+                  !car.isAvailable || totalDays === 0
+                    ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                    : "bg-yellow-400 text-black hover:bg-yellow-300"
+                }`}
               >
-                Book Now
+                💳 Book Now → Payment
               </button>
 
               <button
-                onClick={() => navigate("/vehicles/cars")}
-                className="flex-1 border border-gray-600 text-gray-300 py-3 rounded-xl hover:bg-gray-700 transition"
+                onClick={() => navigate("/vehicles")}
+                className="flex-1 border border-gray-600 text-gray-300 py-3 rounded-xl hover:bg-gray-700 transition flex items-center justify-center gap-2"
               >
-                Back
+                <FaArrowLeft /> Back
               </button>
 
             </div>
