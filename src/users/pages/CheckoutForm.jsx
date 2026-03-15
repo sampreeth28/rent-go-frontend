@@ -13,7 +13,6 @@ const CheckoutForm = ({ carId, totalPrice, bookingDetails, car }) => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
 
-  // Get user ID from sessionStorage or localStorage
   const user = JSON.parse(sessionStorage.getItem('user')) || JSON.parse(localStorage.getItem('user'));
   const userId = user?._id;
 
@@ -44,7 +43,6 @@ const CheckoutForm = ({ carId, totalPrice, bookingDetails, car }) => {
       console.log('Amount:', totalPrice);
       console.log('Currency: INR');
 
-      // Step 1: Get card element
       const cardElement = elements.getElement(CardElement);
 
       if (!cardElement) {
@@ -52,7 +50,6 @@ const CheckoutForm = ({ carId, totalPrice, bookingDetails, car }) => {
         return;
       }
 
-      // Step 2: Create payment method with Stripe
       const { paymentMethod, error: paymentMethodError } = await stripe.createPaymentMethod({
         type: 'card',
         card: cardElement,
@@ -70,19 +67,17 @@ const CheckoutForm = ({ carId, totalPrice, bookingDetails, car }) => {
 
       console.log('Payment method created:', paymentMethod.id);
 
-      // Step 3: Create booking with payment info
       const totalDays = Math.ceil(
         (new Date(bookingDetails.dropoffDate) - new Date(bookingDetails.pickupDate)) / 
         (1000 * 60 * 60 * 24)
       );
 
-      // FIX: Convert dates to proper format and ensure all fields are correct
       const bookingData = {
         userId: userId,
         carId: carId,
         pickupLocation: bookingDetails.pickupLocation,
-        pickupDate: new Date(bookingDetails.pickupDate), // Convert to Date object
-        dropoffDate: new Date(bookingDetails.dropoffDate), // Convert to Date object
+        pickupDate: new Date(bookingDetails.pickupDate),
+        dropoffDate: new Date(bookingDetails.dropoffDate),
         totalDays: totalDays,
         totalPrice: totalPrice,
         paymentId: paymentMethod.id,
@@ -97,14 +92,11 @@ const CheckoutForm = ({ carId, totalPrice, bookingDetails, car }) => {
           brand: car.brand,
           pricePerDay: car.pricePerDay,
         },
-        status: 'PENDING', // Waiting for admin approval
+        status: 'PENDING',
       };
 
       console.log('Booking Data:', bookingData);
-      console.log('Booking Data (JSON):', JSON.stringify(bookingData));
 
-      // Step 4: Send booking to backend
-      // CHANGED: Use port 3000 instead of 5000
       const response = await fetch('http://localhost:3000/api/bookings/create-booking', {
         method: 'POST',
         headers: {
@@ -125,7 +117,6 @@ const CheckoutForm = ({ carId, totalPrice, bookingDetails, car }) => {
       const bookingResult = responseData;
       console.log('Booking created successfully:', bookingResult);
 
-      // Step 5: Navigate to success page
       navigate('/payment-success', {
         state: {
           bookingId: bookingResult.booking?._id,
@@ -139,7 +130,6 @@ const CheckoutForm = ({ carId, totalPrice, bookingDetails, car }) => {
       console.error('Error:', err);
       setError(err.message || 'Payment failed. Please try again.');
       
-      // Navigate to failure page
       navigate('/payment-failure', {
         state: {
           errorMessage: err.message || 'Payment processing failed',
@@ -150,11 +140,13 @@ const CheckoutForm = ({ carId, totalPrice, bookingDetails, car }) => {
     }
   };
 
+  // FIX: Better CardElement styling
   const cardElementOptions = {
     style: {
       base: {
         fontSize: '16px',
-        color: '#fff',
+        color: '#ffffff',
+        fontFamily: '"Segoe UI", "Roboto", sans-serif',
         '::placeholder': {
           color: '#aab7c4',
         },
@@ -164,6 +156,7 @@ const CheckoutForm = ({ carId, totalPrice, bookingDetails, car }) => {
         iconColor: '#fa755a',
       },
     },
+    hidePostalCode: true, // Hide postal/zip code
   };
 
   return (
@@ -223,12 +216,16 @@ const CheckoutForm = ({ carId, totalPrice, bookingDetails, car }) => {
         </div>
       </div>
 
-      {/* Card Element */}
+      {/* Card Element - FIXED */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-white">Card Details</h3>
         
-        <div className="p-4 bg-gray-800 border border-gray-700 rounded-lg">
-          <CardElement options={cardElementOptions} />
+        <div className="p-4 bg-gray-800 border border-gray-700 rounded-lg min-h-[50px]">
+          {stripe && elements ? (
+            <CardElement options={cardElementOptions} />
+          ) : (
+            <p className="text-gray-400">Loading card element...</p>
+          )}
         </div>
 
         <p className="text-xs text-gray-400">

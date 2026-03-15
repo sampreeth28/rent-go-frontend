@@ -304,7 +304,7 @@ function ManageVehicles() {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold">Manage Vehicles</h1>
           <Link 
-            to="/admin/"
+            to="/admin/add"
             className="px-6 py-3 bg-yellow-400 hover:bg-yellow-500 rounded font-bold text-black transition"
           >
             + Add New Vehicle
