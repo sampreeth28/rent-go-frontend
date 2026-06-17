@@ -63,9 +63,16 @@ function Authentication({ insideRegister }) {
             navigate("/");
           }
         }, 1500);
+      } else {
+        alert("Incorrect email or password. Please try again.");
+        setUserDetails({ username: "", email: "", password: "" });
       }
     } catch (error) {
-      alert(error.response?.data || "Invalid credentials");
+      if (error.response?.status === 401 || error.response?.status === 400) {
+        alert("Incorrect email or password. Please try again.");
+      } else {
+        alert(error.response?.data?.message || error.response?.data || "Incorrect email or password. Please try again.");
+      }
       setUserDetails({ username: "", email: "", password: "" });
     }
   };

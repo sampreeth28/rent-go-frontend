@@ -5,7 +5,7 @@ import Footer from '../../components/Footer';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import BlurText from '@/components/BlurText';
-import BlurText1 from '@/components/BlurText1';
+import BlurText1 from '@/components/Blurtext1';
 import BlurText2 from '@/components/BlurText2';
 
 
@@ -49,7 +49,7 @@ function Home() {
 
 
           <div className="flex justify-center items-center my-30 h-[500px] md:h-[500px] sm:h-[300px] xs:h-[200px]">
-            <img className="w-full max-w-[1400px] h-full object-cover" src="https://www.evmwheels.com/uploads/banner/car/1760100047.jpg" alt="CarBanner" />
+            <img className="w-full max-w-[1400px] h-full object-cover" src="https://www.evmwheels.com/uploads/banner/car/1771064980.jpg" alt="CarBanner" />
           </div>
 
 
