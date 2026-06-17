@@ -18,7 +18,7 @@ function Home() {
           <div className="md:grid grid-cols-2 w-full mt-10 ">
 
             <div className="col-span-1 ">
-              <img className='mt-8' src="public/thar.png" alt="" />
+              <img className='mt-8' src="/thar.png" alt="" />
             </div>
 
             <div className="col-span-1 ">
