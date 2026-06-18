@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { useNavigate } from 'react-router-dom';
-import { serverURL } from "../../services/serverURL";
+import serverURL from "../../services/serverURL";
 
 const CheckoutForm = ({ carId, totalPrice, bookingDetails, car }) => {
   const stripe = useStripe();
