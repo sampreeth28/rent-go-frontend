@@ -20,7 +20,7 @@ import {
 import Header from "../components/Header";
 import Footer from "@/components/Footer";
 
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = "https://rent-go-server.onrender.com/uploads/";
 
 function Profile() {
   const user = JSON.parse(sessionStorage.getItem("user"));
