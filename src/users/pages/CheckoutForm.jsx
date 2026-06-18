@@ -97,7 +97,7 @@ const CheckoutForm = ({ carId, totalPrice, bookingDetails, car }) => {
 
       console.log('Booking Data:', bookingData);
 
-      const response = await fetch('http://localhost:3000/api/bookings/create-booking', {
+      const response = await fetch(`${serverURL}/api/bookings/create-booking`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

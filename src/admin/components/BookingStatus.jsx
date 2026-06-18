@@ -19,7 +19,7 @@ import {
   FaIdCard,
 } from "react-icons/fa";
 
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = "https://rent-go-server.onrender.com";
 
 function BookingStatus() {
 
